@@ -71,6 +71,8 @@ class Runner:
         else:
             self._x += 1
 
+    def get_position(self) -> tuple[int, int]:
+        return (self._x, self._y)
 
 def create_runner(x: int = 0, y: int = 0, orientation: str = "N") -> Runner:
     return Runner(x, y, orientation)

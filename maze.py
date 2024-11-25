@@ -8,6 +8,7 @@
 """
 
 from runner import Runner
+from typing import Optional
 
 class Cell:
     def __init__(self, North: bool, East: bool, South: bool, West: bool):
@@ -65,45 +66,83 @@ class Maze:
         cell: Cell = self._maze[x_coordinate][y_coordinate]
         return (cell.north, cell.east, cell.south, cell.west)
 
-    def sense_walls(self, rnner: Runner) -> tuple[bool, bool, bool]:  # tuple(Left, Front, Right)
-        cell: Cell = self._maze[rnner.x][rnner.y]
+    def sense_walls(self, myRunner: Runner) -> tuple[bool, bool, bool]:  # tuple(Left, Front, Right)
+        cell: Cell = self._maze[myRunner.x][myRunner.y]
 
-        if rnner.orientation == 'N':
+        if myRunner.orientation == 'N':
             return (cell.west, cell.north, cell.east)
-        if rnner.orientation == 'E':
+        if myRunner.orientation == 'E':
             return (cell.north, cell.east, cell.south)
-        if rnner.orientation == 'S':
+        if myRunner.orientation == 'S':
             return (cell.east, cell.south, cell.west)
-        if rnner.orientation == 'W':
+        if myRunner.orientation == 'W':
             return (cell.south, cell.west, cell.north)
 
-    def go_straight(self, rnner: Runner) -> Runner:
-        cell: Cell = self._maze[rnner.x][rnner.y]
+    def go_straight(self, myRunner: Runner) -> Runner:
+        cell: Cell = self._maze[myRunner.x][myRunner.y]
 
-        if rnner.orientation == 'N':
+        if myRunner.orientation == 'N':
             if cell.north == True:
                 raise ValueError("There is a wall in front of the runner")
-            rnner.forward()
+            myRunner.forward()
 
-        elif rnner.orientation == 'E':
+        elif myRunner.orientation == 'E':
             if cell.east == True:
                 raise ValueError("There is a wall in front of the runner")
-            rnner.forward()
+            myRunner.forward()
 
-        elif rnner.orientation == 'S':
+        elif myRunner.orientation == 'S':
             if cell.south == True:
                 raise ValueError("There is a wall in front of the runner")
-            rnner.forward()
+            myRunner.forward()
 
         elif cell.orientation == 'W':
             if cell.west == True:
                 raise ValueError("There is a wall in front of the runner")
-            rnner.forward()
+            myRunner.forward()
 
-        return rnner
+        return myRunner
 
-    def move(self, rnner: Runner) -> tuple[Runner, str]:
+    def move(self, myRunner: Runner) -> tuple[Runner, str]:
+        '''left hug'''
+        cell: Cell = self._maze[myRunner.x][myRunner.y]
+        walls = self.sense_walls(myRunner)
+        sequence: str = ""
+
+        if walls[0] == False:
+            myRunner.turn("Left")
+            sequence += "LF"
+
+        elif walls[1] == False:
+            sequence += "F"
+
+        elif walls[2] == False:
+            myRunner.turn("Right")
+            sequence += "RF"
+
+        else:
+            myRunner.turn("Left")
+            myRunner.turn("Left")
+            sequence += "LLF"
+
+        myRunner = self.go_straight(myRunner)
+        return (myRunner, sequence)
+
+    def explore(self, myRunner: Runner, goal : Optional[tuple[int, int]]) -> str:
+        sequence: str = ""
+        if goal == None:
+            goal = (self.width - 1, self.height - 1)
+
+        while (myRunner.get_position() is not goal):
+            (myRunner, move_seq) = self.move(myRunner)
+            sequence += move_seq
+
+        return sequence
+
+    def display(self):
         pass
+
+
 
 
 
