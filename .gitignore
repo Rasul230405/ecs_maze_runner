@@ -1,2 +1,3 @@
-".idea/"
-"test_runner.py" 
+.idea/
+__pycache__/
+*.pyc
