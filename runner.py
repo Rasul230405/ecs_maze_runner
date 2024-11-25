@@ -5,6 +5,7 @@
     'S' - South
     'W' - West
     'E' - East
+
     Last edited: 08/11/2024
     Author: Rasul Abbaszada
 """
@@ -12,10 +13,63 @@
 
 # I think the best data type for runner is to define its own data type. why not?
 class Runner:
-    def __init__(self, x: int, y: int, orientation: str):
-        self.x = x
-        self.y = y
-        self.orientation = orientation
+    def __init__(self, x: int = 0, y: int = 0, orientation: str = "N"):
+        self._x = x
+        self._y = y
+        self._orientation = orientation
+
+    @property
+    def x(self):
+        return self._x
+    @property
+    def y(self):
+        return self._y
+    @property
+    def orientation(self):
+        return self._orientation
+
+    @orientation.setter
+    def orientation(self, orientation):
+        self._orientation = orientation
+
+    @x.setter
+    def x(self, x):
+        self._x = x
+    @y.setter
+    def y(self, y):
+        self._y = y
+
+    def turn(self, direction: str) -> None:
+        if direction == "Right":
+            if self._orientation == "N":
+                self._orientation = "E"
+            elif self._orientation == "W":
+                self_orientation = "N"
+            elif self._orientation == "S":
+                self._orientation = "W"
+            else:
+                self._orientation = "S"
+
+        else:
+            if self._orientation == "N":
+                self._orientation = "W"
+            elif self._orientation == "W":
+                self._orientation = "S"
+            elif self._orientation == "S":
+                self._orientation = "E"
+            else:
+                self._orientation = "N"
+
+    def forward(self) -> None:
+        '''Forward by 1 coordinate.'''
+        if self._orientation == "N":
+            self._y += 1
+        elif self._orientation == "S":
+            self._y -= 1
+        elif self._orientation == "W":
+            self._x -= 1
+        else:
+            self._x += 1
 
 
 def create_runner(x: int = 0, y: int = 0, orientation: str = "N") -> Runner:
@@ -32,38 +86,11 @@ def get_orientation(runner) -> str:
     return runner.orientation
 
 def turn(runner: Runner, direction: str) -> Runner:
-    if direction == "Right":
-        if runner.orientation == "N":
-            runner.orientation = "E"
-        elif runner.orientation == "W":
-            runner.orientation = "N"
-        elif runner.orientation == "S":
-            runner.orientation = "W"
-        else:
-            runner.orientation = "S"
-
-    else:
-        if runner.orientation == "N":
-            runner.orientation = "W"
-        elif runner.orientation == "W":
-            runner.orientation = "S"
-        elif runner.orientation == "S":
-            runner.orientation = "E"
-        else:
-            runner.orientation = "N"
-
+    runner.turn(direction)
     return runner
 
 def forward(runner):
-    if runner.orientation == "N":
-        runner.y += 1
-    elif runner.orientation == "S":
-        runner.y -= 1
-    elif runner.orientation == "W":
-        runner.x -= 1
-    else:
-        runner.x += 1
-
+    runner.forward()
     return runner
 
 

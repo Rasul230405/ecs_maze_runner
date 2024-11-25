@@ -1,13 +1,15 @@
 """
     This module implement the Maze class. Maze has m(width) x n(height) dimensions.
-    It consists of squares which have walls. That's why I have created helper Square class which has 4 variables
-    to describe 4 walls of square. Collection of m x n squares give us the Maze.
+    It consists of cells which have walls. That's why I have created helper Cell class which has 4 properties
+    to describe 4 walls of a cell. Collection of m x n cells give us the Maze.
 
     Author: Rasul Abbaszada
     Last edited: 25/11/2024
 """
 
-class Square:
+from runner import Runner
+
+class Cell:
     def __init__(self, North: bool, East: bool, South: bool, West: bool):
         self.north = North
         self.east = East
@@ -22,12 +24,12 @@ class Maze:
     def __init__(self, width:int = 5, height:int = 5):
         self._width = width
         self._height = height
-        self._maze: list[list[Square]] = self._initialize_maze(width, height)
-    def _initialize_maze(self, width, height) -> list[list[Square]]:
+        self._maze: list[list[Cell]] = self._initialize_maze(width, height)
+    def _initialize_maze(self, width, height) -> list[list[Cell]]:
         '''create maze and external walls'''
 
         # width x height
-        maze = [[Square(False, False, False, False) for _ in range(height)] for _ in range(width)]
+        maze = [[Cell(False, False, False, False) for _ in range(height)] for _ in range(width)]
 
         for row in range(height):
             for col in range(width):
@@ -60,8 +62,54 @@ class Maze:
         self._maze[vertical_line][y_coordinate].west = True
 
     def get_walls(self, x_coordinate: int, y_coordinate: int) -> tuple[bool, bool, bool, bool]:
-        square: Square = self._maze[x_coordinate][y_coordinate]
-        return (square.north, square.east, square.south, square.west)
+        cell: Cell = self._maze[x_coordinate][y_coordinate]
+        return (cell.north, cell.east, cell.south, cell.west)
+
+    def sense_walls(self, rnner: Runner) -> tuple[bool, bool, bool]:  # tuple(Left, Front, Right)
+        cell: Cell = self._maze[rnner.x][rnner.y]
+
+        if rnner.orientation == 'N':
+            return (cell.west, cell.north, cell.east)
+        if rnner.orientation == 'E':
+            return (cell.north, cell.east, cell.south)
+        if rnner.orientation == 'S':
+            return (cell.east, cell.south, cell.west)
+        if rnner.orientation == 'W':
+            return (cell.south, cell.west, cell.north)
+
+    def go_straight(self, rnner: Runner) -> Runner:
+        cell: Cell = self._maze[rnner.x][rnner.y]
+
+        if rnner.orientation == 'N':
+            if cell.north == True:
+                raise ValueError("There is a wall in front of the runner")
+            rnner.forward()
+
+        elif rnner.orientation == 'E':
+            if cell.east == True:
+                raise ValueError("There is a wall in front of the runner")
+            rnner.forward()
+
+        elif rnner.orientation == 'S':
+            if cell.south == True:
+                raise ValueError("There is a wall in front of the runner")
+            rnner.forward()
+
+        elif cell.orientation == 'W':
+            if cell.west == True:
+                raise ValueError("There is a wall in front of the runner")
+            rnner.forward()
+
+        return rnner
+
+    def move(self, rnner: Runner) -> tuple[Runner, str]:
+        pass
+
+
+
+
+
+
 
 
 '''
