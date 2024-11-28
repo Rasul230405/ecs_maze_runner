@@ -139,11 +139,54 @@ class Maze:
 
         return sequence
 
-    def display(self):
-        pass
+    def _visualization(self) -> list[list[str]]:
+        wall: str = "#"
+        path: str = "."
+        vertical_line: int = self._width + 1    # num of possible vertical walls in a row
+        horizontal_line: int = self.height + 1  # num of possible horizontal walls in a column
+        maze_array_width:int = self._width + vertical_line
+        maze_array_height:int = self._height + horizontal_line
 
 
+        maze_array: list[list[str]] = [["." for _ in range(maze_array_width)] for _ in range(maze_array_height)]
 
+        i: int = maze_array_height - 2
+        for col in range(0, self._height):
+            j: int = 1
+            for row in range(0, self._width):
+                maze_array[i][j] = "."
+
+                if self._maze[row][col].north:
+                    maze_array[i - 1][j] = "#"
+                    maze_array[i - 1][j + 1] = "#"
+                    maze_array[i - 1][j - 1] = "#"
+
+                if self._maze[row][col].east:
+                    maze_array[i][j + 1] = "#"
+                    maze_array[i + 1][j + 1] = "#"
+                    maze_array[i - 1][j + 1] = "#"
+
+                if self._maze[row][col].south:
+                    maze_array[i + 1][j] = "#"
+                    maze_array[i + 1][j + 1] = "#"
+                    maze_array[i + 1][j - 1] = "#"
+
+                if self._maze[row][col].west:
+                    maze_array[i][j - 1] = "#"
+                    maze_array[i + 1][j - 1] = "#"
+                    maze_array[i - 1][j - 1] = "#"
+                j += 2
+            i -= 2
+
+        return maze_array
+
+    def print_visualization(self) -> None:
+        maze_array = self._visualization()
+
+        for col in maze_array:
+            for row in col:
+                print(row, end="")
+            print()
 
 
 
@@ -159,10 +202,6 @@ print(m.get_walls(4, 2))
 print(m.get_walls(5, 2))
 print(m.get_walls(0, 0))
 
-mz = m.maze
 
-for line in mz:
-    for square in line:
-        print(square, end=" ")
-    print()
+m.print_visualization()
 '''
