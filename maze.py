@@ -4,7 +4,7 @@
     to describe 4 walls of a cell. Collection of m x n cells give us the Maze.
 
     Author: Rasul Abbaszada
-    Last edited: 25/11/2024
+    Last edited: 29/11/2024
 """
 
 from runner import Runner
@@ -26,6 +26,7 @@ class Maze:
         self._width = width
         self._height = height
         self._maze: list[list[Cell]] = self._initialize_maze(width, height)
+
     def _initialize_maze(self, width, height) -> list[list[Cell]]:
         '''create maze and external walls'''
 
@@ -96,7 +97,7 @@ class Maze:
                 raise ValueError("There is a wall in front of the runner")
             myRunner.forward()
 
-        elif cell.orientation == 'W':
+        elif myRunner.orientation == 'W':
             if cell.west == True:
                 raise ValueError("There is a wall in front of the runner")
             myRunner.forward()
@@ -128,12 +129,12 @@ class Maze:
         myRunner = self.go_straight(myRunner)
         return (myRunner, sequence)
 
-    def explore(self, myRunner: Runner, goal : Optional[tuple[int, int]]) -> str:
+    def explore(self, myRunner: Runner, goal: Optional["tuple[int, int]"]=None) -> str:
         sequence: str = ""
         if goal == None:
             goal = (self.width - 1, self.height - 1)
 
-        while (myRunner.get_position() is not goal):
+        while (myRunner.get_position() != goal):
             (myRunner, move_seq) = self.move(myRunner)
             sequence += move_seq
 
@@ -190,18 +191,17 @@ class Maze:
 
 
 
-
-
-
-
 '''
 m = Maze(11, 5)
 m.add_horizontal_wall(5, 2)
-m.add_vertical_wall(2, 4)
-print(m.get_walls(4, 2))
-print(m.get_walls(5, 2))
-print(m.get_walls(0, 0))
+m.add_vertical_wall(1, 1)
+#print(m.get_walls(4, 2))
+#print(m.get_walls(5, 2))
+#print(m.get_walls(0, 0))
 
 
 m.print_visualization()
+rnnr = Runner(0, 0, "N")
+seq = m.explore(rnnr)
+print(seq)
 '''
