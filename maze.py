@@ -71,12 +71,12 @@ class Maze:
         return self._height
 
     def add_horizontal_wall(self, x_coordinate, horizontal_line) -> None:
-        # when we add wall, it causes 2 squares to change, therefore update both of them
+        # when we add wall, it causes 2 cells to change, therefore update both of them
         self._maze[x_coordinate][horizontal_line - 1].north = True
         self._maze[x_coordinate][horizontal_line].south = True
 
     def add_vertical_wall(self, y_coordinate, vertical_line) -> None:
-        # when we add wall, it causes 2 squares to change, therefore update both of them
+        # when we add wall, it causes 2 cells to change, therefore update both of them
         self._maze[vertical_line - 1][y_coordinate].east = True
         self._maze[vertical_line][y_coordinate].west = True
 
