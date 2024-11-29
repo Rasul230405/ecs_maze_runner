@@ -3,6 +3,22 @@
     It consists of cells which have walls. That's why I have created helper Cell class which has 4 properties
     to describe 4 walls of a cell. Collection of m x n cells give us the Maze.
 
+    Unfortunately, origin of maze is bottom left corner. To make coordinates of 'stored-maze'(self._maze)
+    consistent with the given maze, I have chosen length of the maze array to be height of the given maze, width of
+    the maze array to be width of the given array.
+    For example:
+
+    if w == width and h == height
+
+    Given maze:                Stored maze(self._maze):
+                                   0  1  2
+    2 |  |  |  |  |            0 |  |  |  |
+    1 |  |  |  |  |            1 |  |  |  |
+    0 |  |  |  |  |            2 |  |  |  |
+       0  1  2   3             3 |  |  |  |
+
+       h x w                       w x h
+
     Author: Rasul Abbaszada
     Last edited: 29/11/2024
 """
@@ -27,7 +43,8 @@ class Maze:
         self._height = height
         self._maze: list[list[Cell]] = self._initialize_maze(width, height)
 
-    def _initialize_maze(self, width, height) -> list[list[Cell]]:
+    @staticmethod
+    def _initialize_maze(width, height) -> list[list[Cell]]:
         '''create maze and external walls'''
 
         # width x height
@@ -68,6 +85,7 @@ class Maze:
         return (cell.north, cell.east, cell.south, cell.west)
 
     def sense_walls(self, myRunner: Runner) -> tuple[bool, bool, bool]:  # tuple(Left, Front, Right)
+        '''Returns the information about the walls on the Left, Right and in Front of the runner'''
         cell: Cell = self._maze[myRunner.x][myRunner.y]
 
         if myRunner.orientation == 'N':
@@ -80,6 +98,7 @@ class Maze:
             return (cell.south, cell.west, cell.north)
 
     def go_straight(self, myRunner: Runner) -> Runner:
+        '''If there is no wall, go straight, otherwise raise ValueError'''
         cell: Cell = self._maze[myRunner.x][myRunner.y]
 
         if myRunner.orientation == 'N':
@@ -130,6 +149,8 @@ class Maze:
         return (myRunner, sequence)
 
     def explore(self, myRunner: Runner, goal: Optional["tuple[int, int]"]=None) -> str:
+        # sequence represents the actions the runner took, for instance Left(L) or Right(R) till the runner
+        # reaches the goal
         sequence: str = ""
         if goal == None:
             goal = (self.width - 1, self.height - 1)
@@ -140,39 +161,67 @@ class Maze:
 
         return sequence
 
-    def _visualization(self) -> list[list[str]]:
+    @staticmethod
+    def _visualize(maze: list[list[Cell]], width: int, height: int) -> list[list[str]]:
+        '''
+            Our maze is not stored in the order it should be visualized. (Refer to the top of the document)
+            To make origin of maze_array(array to be printed) to represent the origin of given maze correctly,
+            we will start the index at the bottom left of maze_array and fill that row with the help of 'stored
+            maze'(self._maze), then we will work our way to the top. 'maze_array' will be filled from the bottom to top, while
+            we iterate the 'stored maze' from top to bottom.
+            Remember the number of columns in 'stored maze' represents the actual height of the given maze,
+            the number of rows in 'stored maze' represents the actual width of the given maze.
+
+            Then we first iterate the 1st column of 'stored maze', then 2nd, then 3rd...(we iterate the 1st row in
+            given maze, 2nd row, then 3rd row...)
+
+            So, 1st column of 'stored maze' fills the bottom row of the 'maze_array'(which is the bottom row of
+            given original maze!!!), and it continues like this.
+
+            Second point: Each wall fills 3 coordinate in the maze_array.
+
+            This function returns the maze_array.
+            For printing, see the print function below.
+
+            Hopefully, I made my point clear:)
+        '''
         wall: str = "#"
         path: str = "."
-        vertical_line: int = self._width + 1    # num of possible vertical walls in a row
-        horizontal_line: int = self.height + 1  # num of possible horizontal walls in a column
-        maze_array_width:int = self._width + vertical_line
-        maze_array_height:int = self._height + horizontal_line
+        vertical_line: int = width + 1    # length of vertical line
+        horizontal_line: int = height + 1  # length of horizontal line
+        maze_array_width:int = width + vertical_line
+        maze_array_height:int = height + horizontal_line
 
 
         maze_array: list[list[str]] = [["." for _ in range(maze_array_width)] for _ in range(maze_array_height)]
 
+        # maze_array_height - 1 = last row of the maze array, but last row is only walls, so
+        # to get the index that represents the bottom 'cells':
         i: int = maze_array_height - 2
-        for col in range(0, self._height):
+
+        # each time we decrease j and i by 2. because actual Cells come after each 2 coordinate of maze_array
+        # we can fill neighbouring coordinates according to the info we got in the stored maze(self._maze)
+        for col in range(0, height):
             j: int = 1
-            for row in range(0, self._width):
+            for row in range(0, width):
                 maze_array[i][j] = "."
 
-                if self._maze[row][col].north:
+                if maze[row][col].north:
                     maze_array[i - 1][j] = "#"
                     maze_array[i - 1][j + 1] = "#"
                     maze_array[i - 1][j - 1] = "#"
 
-                if self._maze[row][col].east:
+                if maze[row][col].east:
                     maze_array[i][j + 1] = "#"
                     maze_array[i + 1][j + 1] = "#"
                     maze_array[i - 1][j + 1] = "#"
 
-                if self._maze[row][col].south:
+                if maze[row][col].south:
                     maze_array[i + 1][j] = "#"
                     maze_array[i + 1][j + 1] = "#"
                     maze_array[i + 1][j - 1] = "#"
 
-                if self._maze[row][col].west:
+                if maze[row][col].west:
                     maze_array[i][j - 1] = "#"
                     maze_array[i + 1][j - 1] = "#"
                     maze_array[i - 1][j - 1] = "#"
@@ -182,26 +231,10 @@ class Maze:
         return maze_array
 
     def print_visualization(self) -> None:
-        maze_array = self._visualization()
+        maze_array = self._visualize(self._maze, self._width, self._height)
 
         for col in maze_array:
             for row in col:
                 print(row, end="")
             print()
 
-
-
-'''
-m = Maze(11, 5)
-m.add_horizontal_wall(5, 2)
-m.add_vertical_wall(1, 1)
-#print(m.get_walls(4, 2))
-#print(m.get_walls(5, 2))
-#print(m.get_walls(0, 0))
-
-
-m.print_visualization()
-rnnr = Runner(0, 0, "N")
-seq = m.explore(rnnr)
-print(seq)
-'''
