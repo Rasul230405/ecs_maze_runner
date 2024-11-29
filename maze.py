@@ -162,7 +162,7 @@ class Maze:
         return sequence
 
     @staticmethod
-    def _visualize(maze: list[list[Cell]], width: int, height: int) -> list[list[str]]:
+    def _visualize(maze: list[list[Cell]], width: int, height: int, myRunner: Runner) -> list[list[str]]:
         '''
             Our maze is not stored in the order it should be visualized. (Refer to the top of the document)
             To make origin of maze_array(array to be printed) to represent the origin of given maze correctly,
@@ -228,13 +228,31 @@ class Maze:
                 j += 2
             i -= 2
 
+        # maps the actual coordinate of the runner in given maze to the maze_array
+        # cost me an hour of my life, could I do it in an easy way? yes, but linear mapping has always been interesting for me
+        x: int = maze_array_height - 2 * myRunner.y - 2
+        y: int = 2 * myRunner.x + 1
+        sign: str = ">"
+
+        if myRunner.orientation == "N":
+            sign = "^"
+        elif myRunner.orientation == "E":
+            sign = ">"
+        elif myRunner.orientation == "S":
+            sign = "v"
+        else:
+            sign = "<"
+
+        maze_array[x][y] = sign
         return maze_array
 
-    def print_visualization(self) -> None:
-        maze_array = self._visualize(self._maze, self._width, self._height)
+    def print_visualization(self, myRunner: Runner) -> None:
+        maze_array = self._visualize(self._maze, self._width, self._height, myRunner)
 
         for col in maze_array:
             for row in col:
                 print(row, end="")
             print()
 
+    #def shortest_path(self, starting: Optional[tuple[int, int]], goal: Optional[tuple[int, int]]) -> list[tuple[int, int]]:
+        #pass
