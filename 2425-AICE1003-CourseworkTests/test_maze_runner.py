@@ -133,4 +133,26 @@ def test_explore() -> None:
     get to the target destination. This will be left as an exercise for any keen
     testers.
     """
-    pass
+    mz = Maze(11, 5)
+    mz.add_horizontal_wall(5, 2)
+    runner = create_runner(0, 0, "N")
+    actions = mz.explore(runner)
+
+    test_runner = create_runner(0, 0, "N")
+
+    for action in actions:
+        if action == "L":
+            test_runner.turn("Left")
+        elif action == "R":
+            test_runner.turn("Right")
+        elif action == "F":
+            test_runner = mz.go_straight(test_runner)
+        else:
+            assert False, "Unexpected output!"
+
+    assert runner.x == test_runner.x
+    assert runner.y == test_runner.y
+    assert runner.orientation == test_runner.orientation
+    assert (runner.x, runner.y) == (mz.width - 1, mz.height - 1)
+
+
