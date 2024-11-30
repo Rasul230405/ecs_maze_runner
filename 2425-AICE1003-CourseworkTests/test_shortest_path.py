@@ -56,9 +56,13 @@ def test_shortest_path() -> None:
     path = maze.shortest_path()
     assert path[0] == (0, 0)
     assert path[-1] == (10, 4)
-    print(path)
+    
     prefix = []
     for location in path:
         assert location not in prefix, f"{location} is repeated"
         prefix.append(location)
+
+    # test gaps
+    for i in range(1, len(path)):
+        assert (path[i][1] - path[i - 1][1] + path[i][0] - path[i - 1][0]) <= 1
 
