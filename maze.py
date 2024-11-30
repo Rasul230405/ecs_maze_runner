@@ -42,6 +42,7 @@ class Maze:
         self._width = width
         self._height = height
         self._maze: list[list[Cell]] = self._initialize_maze(width, height)
+        self._explored_coordinates: list[tuple[int, int]] = []
 
     @staticmethod
     def _initialize_maze(width, height) -> list[list[Cell]]:
@@ -155,8 +156,10 @@ class Maze:
         if goal == None:
             goal = (self.width - 1, self.height - 1)
 
+        self._explored_coordinates.append((myRunner.x, myRunner.y))
         while (myRunner.get_position() != goal):
             (myRunner, move_seq) = self.move(myRunner)
+            self._explored_coordinates.append((myRunner.x, myRunner.y))
             sequence += move_seq
 
         return sequence
@@ -254,5 +257,38 @@ class Maze:
                 print(row, end="")
             print()
 
-    def shortest_path(self, starting: Optional[tuple[int, int]], goal: Optional[tuple[int, int]]) -> list[tuple[int, int]]:
-        pass
+
+    def shortest_path(self, starting: Optional[tuple[int, int]] = None, goal: Optional[tuple[int, int]] = None) -> list[tuple[int, int]]:
+        ''' Return the shortest path from start to the goal. (Not the actual shortest path)
+            Firstly, runner explores the maze and stores the coordinates that it stumbled
+            Then we run our algorithm.
+            We keep adding coordinates from explored_coordinates to shortest_path. When we have reached
+            to the visited coordinate that means we have already been in that coordinate. And of course previous
+            path to that coordinate was in shorter distance than the current one, so delete the coordinates from
+            shorter_path after first instance of that coordinate.
+        '''
+
+        if starting == None:
+            myRunner = Runner()
+        else:
+            myRunner = Runner(starting[0], starting[1])
+
+        seq = self.explore(myRunner, goal)
+
+        visited: list[tuple[int, int]] = []
+        shortest_path: list[tuple[int, int]] = []
+
+        for coordinate in self._explored_coordinates:
+            if coordinate not in visited:
+                visited.append(coordinate)
+                shortest_path.append(coordinate)
+            else:
+                for i in range(len(shortest_path)):
+                    if shortest_path[i] == coordinate:
+                        # delete the elements after i
+                        i += 1
+                        del shortest_path[i:]
+                        break
+
+        return shortest_path
+
