@@ -254,5 +254,5 @@ class Maze:
                 print(row, end="")
             print()
 
-    #def shortest_path(self, starting: Optional[tuple[int, int]], goal: Optional[tuple[int, int]]) -> list[tuple[int, int]]:
-        #pass
+    def shortest_path(self, starting: Optional[tuple[int, int]], goal: Optional[tuple[int, int]]) -> list[tuple[int, int]]:
+        pass
