@@ -164,6 +164,8 @@ class Maze:
 
         return sequence
 
+
+
     @staticmethod
     def _visualize(maze: list[list[Cell]], width: int, height: int, myRunner: Runner) -> list[list[str]]:
         '''
@@ -207,47 +209,62 @@ class Maze:
         for col in range(0, height):
             j: int = 1
             for row in range(0, width):
-                maze_array[i][j] = "."
+                maze_array[i][j] = path
+
+                # There is always a '#' in the intersection of vertical and horizontal lines
+                maze_array[i - 1][j - 1] = wall
+                maze_array[i - 1][j + 1] = wall
+                maze_array[i + 1][j - 1] = wall
+                maze_array[i + 1][j + 1] = wall
 
                 if maze[row][col].north:
-                    maze_array[i - 1][j] = "#"
-                    maze_array[i - 1][j + 1] = "#"
-                    maze_array[i - 1][j - 1] = "#"
+                    maze_array[i - 1][j] = wall
+                    maze_array[i - 1][j + 1] = wall
+                    maze_array[i - 1][j - 1] = wall
 
                 if maze[row][col].east:
-                    maze_array[i][j + 1] = "#"
-                    maze_array[i + 1][j + 1] = "#"
-                    maze_array[i - 1][j + 1] = "#"
+                    maze_array[i][j + 1] = wall
+                    maze_array[i + 1][j + 1] = wall
+                    maze_array[i - 1][j + 1] = wall
 
                 if maze[row][col].south:
-                    maze_array[i + 1][j] = "#"
-                    maze_array[i + 1][j + 1] = "#"
-                    maze_array[i + 1][j - 1] = "#"
+                    maze_array[i + 1][j] = wall
+                    maze_array[i + 1][j + 1] = wall
+                    maze_array[i + 1][j - 1] = wall
 
                 if maze[row][col].west:
-                    maze_array[i][j - 1] = "#"
-                    maze_array[i + 1][j - 1] = "#"
-                    maze_array[i - 1][j - 1] = "#"
+                    maze_array[i][j - 1] = wall
+                    maze_array[i + 1][j - 1] = wall
+                    maze_array[i - 1][j - 1] = wall
                 j += 2
             i -= 2
 
         # maps the actual coordinate of the runner in given maze to the maze_array
-        # cost me an hour of my life, could I do it in an easy way? yes, but linear mapping has always been interesting for me
-        x: int = maze_array_height - 2 * myRunner.y - 2
-        y: int = 2 * myRunner.x + 1
-        sign: str = ">"
+        x, y = Maze._map_coordinates(maze_array_height, myRunner)
 
-        if myRunner.orientation == "N":
-            sign = "^"
-        elif myRunner.orientation == "E":
-            sign = ">"
-        elif myRunner.orientation == "S":
-            sign = "v"
-        else:
-            sign = "<"
+        runner_symbol: str = Maze._get_runner_symbol(myRunner)
+        maze_array[x][y] = runner_symbol
 
-        maze_array[x][y] = sign
         return maze_array
+
+    @staticmethod
+    def _get_runner_symbol(myRunner: Runner):
+        if myRunner.orientation == "N":
+            symbol = "^"
+        elif myRunner.orientation == "E":
+            symbol = ">"
+        elif myRunner.orientation == "S":
+            symbol = "v"
+        else:
+            symbol = "<"
+        return symbol
+
+    @staticmethod
+    def _map_coordinates(maze_array_height: int, myRunner: Runner):
+        '''maps coordinates from stored maze(self._maze) to maze to be printed(maze_array)'''
+        # cost me an hour of my life, could I do it in an easy way? yes, but linear mapping has always been interesting for me
+        return (maze_array_height - 2 * myRunner.y - 2, 2 * myRunner.x + 1)
+
 
     def print_visualization(self, myRunner: Runner) -> None:
         maze_array = self._visualize(self._maze, self._width, self._height, myRunner)
@@ -292,3 +309,6 @@ class Maze:
 
         return shortest_path
 
+m = Maze(11, 5)
+myRunner = Runner()
+m.print_visualization(myRunner)
