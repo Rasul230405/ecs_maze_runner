@@ -28,7 +28,7 @@ def maze_reader(maze_file: str) -> Maze:
         path: str = "."
         height: int = len(content) // 2
         width: int = len(content[0]) // 2
-        maze = Maze(width, height)
+        maze:Maze = Maze(width, height)
         # read maze_file
         for i in range(len(content) - 2, 0, -2):
             for j in range(1, len(content[0]) - 1, 2):
@@ -53,13 +53,6 @@ def maze_reader(maze_file: str) -> Maze:
 
     except Exception as d:
         raise ValueError(f"Incorrect dimension or incorrect value in maze\n")
-
-
-
-m = maze_reader(r"C:\Users\User\Desktop\SOTON\Year_1\High_Level_Programming\coursework\ecs_maze_runner\2425-AICE1003-CourseworkTests\mazes\medium_maze2.mz")
-myRunner = Runner()
-m.print_visualization(myRunner)
-print()
 
 
 
