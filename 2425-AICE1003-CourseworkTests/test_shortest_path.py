@@ -11,6 +11,15 @@ __maintainer__ = "Son Hoang"
 __email__ = "T.S.Hoang@soton.ac.uk"
 __status__ = "Prototype"
 
+import sys
+import os
+
+# Get the parent directory
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+
+# Add it to the system path
+sys.path.append(parent_dir)
+
 from maze import Maze
 
 
@@ -32,11 +41,24 @@ def test_shortest_path() -> None:
     """
     maze = Maze(11, 5)
     maze.add_horizontal_wall(0, 1)
+    maze.add_horizontal_wall(4, 3)
+    maze.add_horizontal_wall(5, 4)
+    maze.add_horizontal_wall(5, 2)
     maze.add_vertical_wall(1, 1)
+    maze.add_vertical_wall(3, 2)
+    maze.add_vertical_wall(4, 2)
+    maze.add_vertical_wall(3, 4)
+    maze.add_vertical_wall(4, 4)
+    maze.add_vertical_wall(3, 5)
+    maze.add_vertical_wall(3, 6)
+    maze.add_vertical_wall(2, 6)
+
     path = maze.shortest_path()
     assert path[0] == (0, 0)
     assert path[-1] == (10, 4)
+    print(path)
     prefix = []
     for location in path:
         assert location not in prefix, f"{location} is repeated"
         prefix.append(location)
+
