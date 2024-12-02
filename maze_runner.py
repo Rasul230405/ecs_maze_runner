@@ -9,6 +9,7 @@
 from maze import Maze
 import argparse
 from typing import Optional
+import re
 
 # raises Exception if something goes wrong when reading file
 def get_file_content(file: str) -> list[str]:
@@ -94,23 +95,17 @@ def maze_reader(maze_file: str) -> Maze:
     except Exception as e:
         raise e
 
-def check_arguments(content: list[str], starting: Optional[tuple[int, int]], goal: Optional[tuple[int , int]]) -> bool:
+def is_in_dimension(content: list[str], starting: Optional[tuple[int, int]], goal: Optional[tuple[int , int]]) -> bool:
     height: int = len(content) // 2  # height of the maze
     width: int = len(content[0]) // 2   # width of the maze
 
     if goal != None:
-        if not isinstance(goal, tuple):
-            return False
-
         # check if out of dimension
-        if goal[0] < 0 or goal[0] > width - 1 \
-        or goal[1] < 0 or goal[1] > height - 1 :
+        if goal[0] < 0 or goal[0] > width - 1\
+        or goal[1] < 0 or goal[1] > height - 1:
             return False
 
     if starting != None:
-        if not isinstance(starting, tuple):
-            return False
-
         # check if out of dimension
         if starting[0] < 0 or starting[0] > width - 1 \
         or starting[1] < 0 or starting[1] > height - 1:
@@ -119,22 +114,34 @@ def check_arguments(content: list[str], starting: Optional[tuple[int, int]], goa
     return True
 
 
-def str_to_tuple(s: str) -> tuple[int , int]:
-    '''
-        if input is correct after s.strip, it has to have lengths 3 and s[0] and s[2] must be digit
-    '''
+def str_to_tuple(s: str) -> tuple[int, int]:
+    '''Firstly, we check if formatting is correct, then we return tuple that represents coordinates'''
     if s == None:
         return None
 
-    s = s.replace(" ", "")
-    if len(s) != 3:
-        raise ValueError("Incorrect argument\n")
+    expected_tokens = [",", " "] # order is important, we expect tokens in the order as they appear in the list
 
-    if not s[0].isdigit() or not s[2].isdigit():
-        raise ValueError("Coordinates must be numerical\n")
+    for token in expected_tokens:
+        if token not in s:
+            raise ValueError(f"expected character: {token}")
 
-    return (int(s[0]), int(s[2]))
+    j = 0
+    for i in range(0, len(s)):
+        if i == 0 and not s[i].isdigit():
+            raise ValueError("must be digit\n")
 
+        if not s[i].isdigit():
+            if j < len(expected_tokens):
+                if s[i] == expected_tokens[j]:
+                    j += 1
+                    continue
+                else:
+                    raise ValueError(f"Incorrect token: {s[i]}")
+            else:
+                raise ValueError(f"extra tokens are not allowed\n")
+
+    coordinates = re.findall(r'\d+', s)
+    return (int(coordinates[0]), int(coordinates[1]))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -150,8 +157,8 @@ if __name__ == "__main__":
         starting: tuple[int, int] = str_to_tuple(args.starting)
         goal: tuple[int, int] = str_to_tuple(args.goal)
 
-        if not check_arguments(content, starting, goal):
-            raise ValueError("Incorrect arguments")
+        if not is_in_dimension(content, starting, goal):
+            raise ValueError(f"{starting} or {goal} is/are out of dimension\n")
 
         # create maze and run shortest_path algorithm
         myMaze: Maze = maze_reader(args.maze)
