@@ -47,7 +47,7 @@ def check_content(content: list[str]) -> None:
                     raise ValueError("Incorrect character in external wall")
 
 
-def maze_reader(maze_file: str) -> Maze:
+def maze_reader(maze_file: str, stat_file: Optional[str]="statistics.txt") -> Maze:
     wall: str = "#"
     path: str = "."
 
@@ -55,6 +55,10 @@ def maze_reader(maze_file: str) -> Maze:
         content: list[str] = get_file_content(maze_file)
     except Exception:
         raise IOError("Something happened when reading the file")
+
+    # write the name of the file to the statistics file
+    with open(stat_file, 'w', newline='') as st_f:
+        st_f.writelines(maze_file + "\n")
 
     try:
         # checks content, raises Exception if anything illegal happens

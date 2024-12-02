@@ -25,6 +25,7 @@
 
 from runner import Runner
 from typing import Optional
+import csv
 
 class Cell:
     def __init__(self, North: bool, East: bool, South: bool, West: bool):
@@ -43,6 +44,7 @@ class Maze:
         self._height = height
         self._maze: list[list[Cell]] = self._initialize_maze(width, height)
         self._explored_coordinates: list[tuple[int, int]] = []
+        self._exploration_steps = 0
 
     @property
     def maze(self):
@@ -161,21 +163,35 @@ class Maze:
         myRunner = self.go_straight(myRunner)
         return (myRunner, sequence)
 
-    def explore(self, myRunner: Runner, goal: Optional["tuple[int, int]"]=None) -> str:
+    def explore(self, myRunner: Runner, goal: Optional["tuple[int, int]"]=None, explore_file: Optional[str]="exploration.csv") -> str:
         # sequence represents the actions the runner took, for instance Left(L) or Right(R) till the runner
         # reaches the goal
         sequence: str = ""
         if goal == None:
             goal = (self._width - 1, self._height - 1)
 
-        self._explored_coordinates.append((myRunner.x, myRunner.y))
-        while (myRunner.get_position() != goal):
-            (myRunner, move_seq) = self.move(myRunner)
+
+        with open(explore_file, 'w', newline='') as exp_f:
+            headers = ["Step", "x-coordinate", "y-coordinate", "Actions"]
+            exp_writer = csv.DictWriter(exp_f, fieldnames=headers)
+
+            exp_writer.writeheader()
             self._explored_coordinates.append((myRunner.x, myRunner.y))
-            sequence += move_seq
+
+            self._exploration_steps = 0
+            while (myRunner.get_position() != goal):
+                prev_x: int = myRunner.x
+                prev_y: int = myRunner.y
+                (myRunner, move_seq) = self.move(myRunner)
+
+                # write to the file
+                exp_writer.writerow({"Step": self._exploration_steps + 1, "x-coordinate": prev_x, "y-coordinate": prev_y, "Actions": move_seq})
+
+                self._explored_coordinates.append((myRunner.x, myRunner.y))
+                sequence += move_seq
+                self._exploration_steps += 1
 
         return sequence
-
 
 
     @staticmethod
@@ -307,8 +323,20 @@ class Maze:
                 print(row, end="")
             print()
 
+    @staticmethod
+    def _write_stat_file(stat_file: str, score: float, exploration_steps: int, shortest_path: list[tuple[int, int]], length_shortest_path: int):
+        with open(stat_file, 'a', newline='') as st_f:
+            st_f.writelines(str(score) + "\n")
+            st_f.writelines(str(exploration_steps) + "\n")
 
-    def shortest_path(self, starting: Optional[tuple[int, int]] = None, goal: Optional[tuple[int, int]] = None) -> list[tuple[int, int]]:
+            for pair in shortest_path:
+                line = "(" + str(pair[0]) + ", " + str(pair[1]) + ")" + " "
+                st_f.write(line)
+            st_f.write("\n")
+
+            st_f.writelines(str(len(shortest_path)) + "\n")
+
+    def shortest_path(self, starting: Optional[tuple[int, int]] = None, goal: Optional[tuple[int, int]] = None, exploration_file: Optional[str]="exploration.csv", stat_file: Optional[str]="statistics.txt") -> list[tuple[int, int]]:
         ''' Return the shortest path from start to the goal. (Not the actual shortest path)
             Firstly, runner explores the maze and stores the coordinates that it stumbled
             Then we run our algorithm.
@@ -323,7 +351,7 @@ class Maze:
         else:
             myRunner = Runner(starting[0], starting[1])
 
-        seq = self.explore(myRunner, goal)
+        seq = self.explore(myRunner, goal, exploration_file)
 
         visited: list[tuple[int, int]] = []
         shortest_path: list[tuple[int, int]] = []
@@ -339,5 +367,9 @@ class Maze:
                         i += 1
                         del shortest_path[i:]
                         break
+
+        # write to the statistics file
+        score: float = float(self._exploration_steps / 4 + len(shortest_path))
+        Maze._write_stat_file(stat_file, score, self._exploration_steps, shortest_path, len(shortest_path))
 
         return shortest_path
