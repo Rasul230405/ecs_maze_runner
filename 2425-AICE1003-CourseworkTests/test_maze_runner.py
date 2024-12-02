@@ -14,10 +14,9 @@ __status__ = "Prototype"
 import sys
 import os
 
-# Get the parent directory
+
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
-# Add it to the system path
 sys.path.append(parent_dir)
 
 from maze import Maze  # type: ignore

@@ -44,7 +44,7 @@ class Runner:
             if self._orientation == "N":
                 self._orientation = "E"
             elif self._orientation == "W":
-                self_orientation = "N"
+                self._orientation = "N"
             elif self._orientation == "S":
                 self._orientation = "W"
             else:

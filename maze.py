@@ -44,6 +44,10 @@ class Maze:
         self._maze: list[list[Cell]] = self._initialize_maze(width, height)
         self._explored_coordinates: list[tuple[int, int]] = []
 
+    @property
+    def maze(self):
+        return self._maze
+
     @staticmethod
     def _initialize_maze(width, height) -> list[list[Cell]]:
         '''create maze and external walls'''
@@ -74,12 +78,20 @@ class Maze:
     def add_horizontal_wall(self, x_coordinate, horizontal_line) -> None:
         # when we add wall, it causes 2 cells to change, therefore update both of them
         self._maze[x_coordinate][horizontal_line - 1].north = True
-        self._maze[x_coordinate][horizontal_line].south = True
+
+        # check if we are not on the upmost row. In this case cell is closed from the above by external wall
+        # that means we are on the upmost row. There is no wall on the north that we can add wall to its south.
+        if (horizontal_line < self._height):
+            self._maze[x_coordinate][horizontal_line].south = True
 
     def add_vertical_wall(self, y_coordinate, vertical_line) -> None:
         # when we add wall, it causes 2 cells to change, therefore update both of them
         self._maze[vertical_line - 1][y_coordinate].east = True
-        self._maze[vertical_line][y_coordinate].west = True
+
+        # check if we are not on the rightmost column. Because in these cases we are on the last
+        # column that are adjacent to the external wall. There is no cell after that we cann add wall to its west.
+        if (vertical_line < self._width):
+            self._maze[vertical_line][y_coordinate].west = True
 
     def get_walls(self, x_coordinate: int, y_coordinate: int) -> tuple[bool, bool, bool, bool]:
         cell: Cell = self._maze[x_coordinate][y_coordinate]
@@ -154,7 +166,7 @@ class Maze:
         # reaches the goal
         sequence: str = ""
         if goal == None:
-            goal = (self.width - 1, self.height - 1)
+            goal = (self._width - 1, self._height - 1)
 
         self._explored_coordinates.append((myRunner.x, myRunner.y))
         while (myRunner.get_position() != goal):
@@ -201,11 +213,32 @@ class Maze:
         maze_array: list[list[str]] = [["." for _ in range(maze_array_width)] for _ in range(maze_array_height)]
 
         # maze_array_height - 1 = last row of the maze array, but last row is only walls, so
-        # to get the index that represents the bottom 'cells':
+        # to get the index that represents the bottom 'cells'(inside the cell):
         i: int = maze_array_height - 2
 
-        # each time we decrease j and i by 2. because actual Cells come after each 2 coordinate of maze_array
+        # each time we decrease j and i by 2. because coordinate that represents inside of the grid (Cell) comes in every 2 coordinates of maze_array
         # we can fill neighbouring coordinates according to the info we got in the stored maze(self._maze)
+        '''
+        Examples. Following is 1 grid that have no walls:
+               j
+              #.#
+            i ...
+              #.#
+            
+            let's say we want to add wall to the north and west.
+            Always put '#' to the intersections of vertical and horizontal lines.
+            we can fill all the adjacent positions by just the info we got for the inside of the
+            grid cell in position (i, j). 
+            So there is no need to loop all of them. 
+            If there is a wall in the north put '#' to i - 1'th position, if there is a wall in the 
+            west put '#' to the j - 1'th position.
+            
+            After putting '#'s:
+                   j
+                  ###
+                i #..
+                  #.#  
+        '''
         for col in range(0, height):
             j: int = 1
             for row in range(0, width):
@@ -308,7 +341,3 @@ class Maze:
                         break
 
         return shortest_path
-
-m = Maze(11, 5)
-myRunner = Runner()
-m.print_visualization(myRunner)
