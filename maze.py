@@ -46,10 +46,6 @@ class Maze:
         self._explored_coordinates: list[tuple[int, int]] = []
         self._exploration_steps = 0
 
-    @property
-    def maze(self):
-        return self._maze
-
     @staticmethod
     def _initialize_maze(width, height) -> list[list[Cell]]:
         '''create maze and external walls'''
